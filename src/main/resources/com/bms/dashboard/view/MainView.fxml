@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.bms.dashboard.controller.MainController"
+      spacing="12" prefWidth="1280" prefHeight="850" styleClass="root">
+    
+    <!-- TOP BAR -->
+    <HBox spacing="16" alignment="CENTER_LEFT" styleClass="top-bar">
+        <Label text="⚡ BMS-MONITOR 4S" styleClass="app-title"/>
+        
+        <Label fx:id="modeBannerLabel" text="IDLE" styleClass="mode-banner, mode-idle"/>
+        
+        <Region HBox.hgrow="ALWAYS"/>
+
+        <!-- Serial Controls -->
+        <HBox spacing="8" alignment="CENTER_LEFT">
+            <Label text="Port:"/>
+            <ComboBox fx:id="portComboBox" prefWidth="110"/>
+            <Button text="🔄" onAction="#refreshPortList" style="-fx-padding: 4 8;"/>
+            <Label text="Baud:"/>
+            <TextField fx:id="baudRateField" prefWidth="75"/>
+            <Button fx:id="connectButton" text="Connect" onAction="#handleConnectDisconnect" styleClass="button-primary"/>
+        </HBox>
+
+        <Separator orientation="VERTICAL"/>
+
+        <ToggleButton fx:id="simulatorToggle" text="🎮 Simulator" onAction="#handleSimulatorToggle"/>
+        <Button text="⚙ Settings" onAction="#handleOpenSettings"/>
+
+        <!-- Connection Status Pill -->
+        <HBox fx:id="connectionPill" alignment="CENTER" styleClass="connection-pill, pill-disconnected">
+            <Label fx:id="pillStatusText" text="DISCONNECTED | 0s ago | 0.0 Hz" style="-fx-text-fill: inherit;"/>
+        </HBox>
+    </HBox>
+
+    <!-- MAIN BODY SPLIT -->
+    <SplitPane dividerPositions="0.48" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent;">
+        <!-- LEFT COLUMN: LIVE READINGS & CELL BAR CHART -->
+        <VBox spacing="12" styleClass="card-panel">
+            <padding>
+                <Insets top="12" right="12" bottom="12" left="12"/>
+            </padding>
+            <Label text="LIVE TELEMETRY &amp; PACK METRICS" styleClass="section-header"/>
+
+            <!-- 4 Metric Tiles Grid -->
+            <VBox fx:id="liveReadingsContainer" spacing="10">
+                <GridPane hgap="10" vgap="10">
+                    <columnConstraints">
+                        <ColumnConstraints percentWidth="50"/>
+                        <ColumnConstraints percentWidth="50"/>
+                    </columnConstraints>
+                    
+                    <!-- Pack Voltage -->
+                    <VBox GridPane.rowIndex="0" GridPane.columnIndex="0" styleClass="metric-tile">
+                        <Label text="PACK VOLTAGE" styleClass="metric-title"/>
+                        <HBox alignment="BASELINE_LEFT" spacing="4">
+                            <Label fx:id="packVoltageLabel" text="14.80" styleClass="metric-value"/>
+                            <Label text="V" styleClass="metric-unit"/>
+                        </HBox>
+                        <ProgressBar fx:id="packVoltageBar" progress="0.64" maxWidth="Infinity" style="-fx-accent: #38bdf8;"/>
+                    </VBox>
+
+                    <!-- Pack Current -->
+                    <VBox GridPane.rowIndex="0" GridPane.columnIndex="1" styleClass="metric-tile">
+                        <Label text="PACK CURRENT" styleClass="metric-title"/>
+                        <HBox alignment="BASELINE_LEFT" spacing="4">
+                            <Label fx:id="currentLabel" text="+0.00" styleClass="metric-value"/>
+                            <Label text="A" styleClass="metric-unit"/>
+                        </HBox>
+                        <ProgressBar fx:id="currentBar" progress="0.50" maxWidth="Infinity" style="-fx-accent: #f59e0b;"/>
+                    </VBox>
+
+                    <!-- Temperature -->
+                    <VBox GridPane.rowIndex="1" GridPane.columnIndex="0" styleClass="metric-tile">
+                        <Label text="TEMPERATURE" styleClass="metric-title"/>
+                        <HBox alignment="BASELINE_LEFT" spacing="4">
+                            <Label fx:id="tempLabel" text="25.0" styleClass="metric-value"/>
+                            <Label text="°C" styleClass="metric-unit"/>
+                        </HBox>
+                        <ProgressBar fx:id="tempBar" progress="0.42" maxWidth="Infinity" style="-fx-accent: #10b981;"/>
+                    </VBox>
+
+                    <!-- Power -->
+                    <VBox GridPane.rowIndex="1" GridPane.columnIndex="1" styleClass="metric-tile">
+                        <Label text="POWER OUTPUT" styleClass="metric-title"/>
+                        <HBox alignment="BASELINE_LEFT" spacing="4">
+                            <Label fx:id="powerLabel" text="0.0" styleClass="metric-value"/>
+                            <Label text="W" styleClass="metric-unit"/>
+                        </HBox>
+                        <ProgressBar fx:id="powerBar" progress="0.0" maxWidth="Infinity" style="-fx-accent: #a855f7;"/>
+                    </VBox>
+                </GridPane>
+
+                <!-- SoC Battery Gauge -->
+                <VBox styleClass="metric-tile" spacing="4">
+                    <HBox alignment="CENTER_LEFT">
+                        <Label text="STATE OF CHARGE (SoC)" styleClass="metric-title"/>
+                        <Region HBox.hgrow="ALWAYS"/>
+                        <Label fx:id="socPercentLabel" text="65.0 %" styleClass="metric-title" style="-fx-font-size: 14px; -fx-text-fill: #34d399;"/>
+                    </HBox>
+                    <ProgressBar fx:id="socProgressBar" progress="0.65" maxWidth="Infinity" prefHeight="18" styleClass="soc-progress-bar, soc-high"/>
+                </VBox>
+            </VBox>
+
+            <!-- Cell Voltage Bar Chart -->
+            <VBox VBox.vgrow="ALWAYS" styleClass="metric-tile" spacing="4">
+                <Label text="CELL VOLTAGES (4S PACK)" styleClass="metric-title"/>
+                <BarChart fx:id="cellBarChart" legendVisible="false" verticalGridLinesVisible="false" prefHeight="180" VBox.vgrow="ALWAYS">
+                    <xAxis>
+                        <CategoryAxis fx:id="cellXAxis" tickLabelFill="#94a3b8"/>
+                    </xAxis>
+                    <yAxis>
+                        <NumberAxis fx:id="cellYAxis" lowerBound="2.5" upperBound="4.3" autoRanging="false" tickUnit="0.2" tickLabelFill="#94a3b8"/>
+                    </yAxis>
+                </BarChart>
+                <!-- Cell Min / Max / Delta readouts -->
+                <HBox spacing="20" alignment="CENTER">
+                    <Label text="MAX:"/>
+                    <Label fx:id="maxCellLabel" text="3.700 V" style="-fx-font-weight: bold; -fx-font-family: monospace;"/>
+                    <Label text="MIN:"/>
+                    <Label fx:id="minCellLabel" text="3.700 V" style="-fx-font-weight: bold; -fx-font-family: monospace;"/>
+                    <Label text="DELTA:"/>
+                    <Label fx:id="cellDeltaLabel" text="0.0 mV" styleClass="delta-normal" style="-fx-font-weight: bold; -fx-font-family: monospace;"/>
+                </HBox>
+            </VBox>
+        </VBox>
+
+        <!-- RIGHT COLUMN: PROTECTION STATUS & ALERTS -->
+        <VBox spacing="12" styleClass="card-panel">
+            <padding>
+                <Insets top="12" right="12" bottom="12" left="12"/>
+            </padding>
+            <Label text="PROTECTION LOGIC &amp; SAFETY ALERTS" styleClass="section-header"/>
+
+            <!-- Protection Lamps Grid -->
+            <VBox spacing="8" styleClass="metric-tile">
+                <GridPane vgap="8" hgap="12">
+                    <columnConstraints">
+                        <ColumnConstraints percentWidth="35"/>
+                        <ColumnConstraints percentWidth="25"/>
+                        <ColumnConstraints percentWidth="20"/>
+                        <ColumnConstraints percentWidth="20"/>
+                    </columnConstraints>
+
+                    <!-- Overcharge -->
+                    <Label text="Overcharge (Cell):" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <Label fx:id="overchargeLamp" text="NORMAL" styleClass="protection-lamp, lamp-normal" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+                    <Label fx:id="overchargeValueLabel" text="3.70 V" style="-fx-font-family: monospace;" GridPane.rowIndex="0" GridPane.columnIndex="2"/>
+                    <Label fx:id="overchargeThreshLabel" text="> 4.20 V" style="-fx-text-fill: #64748b; -fx-font-family: monospace;" GridPane.rowIndex="0" GridPane.columnIndex="3"/>
+
+                    <!-- Over-discharge -->
+                    <Label text="Over-discharge (Cell):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+                    <Label fx:id="overdischargeLamp" text="NORMAL" styleClass="protection-lamp, lamp-normal" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+                    <Label fx:id="overdischargeValueLabel" text="3.70 V" style="-fx-font-family: monospace;" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
+                    <Label fx:id="overdischargeThreshLabel" text="< 2.80 V" style="-fx-text-fill: #64748b; -fx-font-family: monospace;" GridPane.rowIndex="1" GridPane.columnIndex="3"/>
+
+                    <!-- Overcurrent -->
+                    <Label text="Overcurrent (|I|):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+                    <Label fx:id="overcurrentLamp" text="NORMAL" styleClass="protection-lamp, lamp-normal" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+                    <Label fx:id="overcurrentValueLabel" text="0.00 A" style="-fx-font-family: monospace;" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+                    <Label fx:id="overcurrentThreshLabel" text="> 5.00 A" style="-fx-text-fill: #64748b; -fx-font-family: monospace;" GridPane.rowIndex="2" GridPane.columnIndex="3"/>
+
+                    <!-- Over-temperature -->
+                    <Label text="Over-temperature:" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+                    <Label fx:id="overtempLamp" text="NORMAL" styleClass="protection-lamp, lamp-normal" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+                    <Label fx:id="overtempValueLabel" text="25.0 °C" style="-fx-font-family: monospace;" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+                    <Label fx:id="overtempThreshLabel" text="> 55.0 °C" style="-fx-text-fill: #64748b; -fx-font-family: monospace;" GridPane.rowIndex="3" GridPane.columnIndex="3"/>
+                </GridPane>
+
+                <Separator/>
+
+                <!-- FET Controls & Reset Faults -->
+                <HBox spacing="14" alignment="CENTER_LEFT">
+                    <Label fx:id="chargeFetStatusLabel" text="CHARGE FET: ON" styleClass="fet-label, fet-on"/>
+                    <Label fx:id="dischargeFetStatusLabel" text="DISCHARGE FET: ON" styleClass="fet-label, fet-on"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="resetFaultsButton" text="Reset Faults" onAction="#handleResetFaults" styleClass="button-danger"/>
+                </HBox>
+            </VBox>
+
+            <!-- Alert Log Table -->
+            <VBox VBox.vgrow="ALWAYS" spacing="4">
+                <Label text="SYSTEM ALERT LOG (LAST 200 TRIPS)" styleClass="metric-title"/>
+                <TableView fx:id="alertLogTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colTime" text="Time" prefWidth="85"/>
+                        <TableColumn fx:id="colParameter" text="Parameter" prefWidth="175"/>
+                        <TableColumn fx:id="colValue" text="Live Value" prefWidth="100"/>
+                        <TableColumn fx:id="colThreshold" text="Threshold" prefWidth="110"/>
+                        <TableColumn fx:id="colSeverity" text="Severity" prefWidth="90"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </SplitPane>
+
+    <!-- BOTTOM PANEL: TREND CHARTS & LOGGING / SIMULATOR FAULT INJECTION -->
+    <HBox spacing="12" prefHeight="220" styleClass="card-panel">
+        <padding>
+            <Insets top="8" right="12" bottom="8" left="12"/>
+        </padding>
+
+        <!-- Line Chart 1: Pack V & I (120s rolling) -->
+        <VBox HBox.hgrow="ALWAYS" spacing="2">
+            <Label text="VOLTAGE &amp; CURRENT TRENDS (120s ROLLING WINDOW)" styleClass="metric-title"/>
+            <LineChart fx:id="voltageCurrentChart" animated="false" createSymbols="false" legendSide="TOP" VBox.vgrow="ALWAYS">
+                <xAxis>
+                    <NumberAxis fx:id="vcTimeAxis" label="Time (sec)" autoRanging="false"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis fx:id="voltageAxis" label="Telemetry Value" autoRanging="true"/>
+                </yAxis>
+            </LineChart>
+        </VBox>
+
+        <!-- Line Chart 2: Temperature (120s rolling) -->
+        <VBox HBox.hgrow="ALWAYS" spacing="2">
+            <Label text="TEMPERATURE TREND (°C)" styleClass="metric-title"/>
+            <LineChart fx:id="tempChart" animated="false" createSymbols="false" legendSide="TOP" VBox.vgrow="ALWAYS">
+                <xAxis>
+                    <NumberAxis fx:id="tempTimeAxis" label="Time (sec)" autoRanging="false"/>
+                </xAxis>
+                <yAxis>
+                    <NumberAxis fx:id="tempYAxis" label="Temp (°C)" autoRanging="true"/>
+                </yAxis>
+            </LineChart>
+        </VBox>
+
+        <Separator orientation="VERTICAL"/>
+
+        <!-- Fault Injection & Logging Controls Sidebar -->
+        <VBox spacing="10" prefWidth="260">
+            <!-- Fault Injection -->
+            <VBox styleClass="metric-tile" spacing="6">
+                <Label text="FAULT INJECTION (SIMULATOR)" styleClass="metric-title" style="-fx-text-fill: #f59e0b;"/>
+                <CheckBox fx:id="forceOverchargeCheck" text="Force Overcharge (>4.20V)" onAction="#handleFaultInjections"/>
+                <CheckBox fx:id="forceOverdischargeCheck" text="Force Over-discharge (<2.80V)" onAction="#handleFaultInjections"/>
+                <CheckBox fx:id="forceOvercurrentCheck" text="Force Overcurrent (>5.0A)" onAction="#handleFaultInjections"/>
+                <CheckBox fx:id="forceOvertempCheck" text="Force Over-temp (>55.0°C)" onAction="#handleFaultInjections"/>
+            </VBox>
+
+            <!-- CSV Logging -->
+            <VBox styleClass="metric-tile" spacing="6" VBox.vgrow="ALWAYS">
+                <Label text="DATA LOGGING &amp; EXPORT" styleClass="metric-title"/>
+                <HBox spacing="8" alignment="CENTER_LEFT">
+                    <ToggleButton fx:id="loggingToggle" text="Start Logging" onAction="#handleLoggingToggle"/>
+                    <Button fx:id="exportCsvButton" text="Export CSV" onAction="#handleExportCsv"/>
+                </HBox>
+                <HBox spacing="8">
+                    <Label text="File:" style="-fx-text-fill: #64748b;"/>
+                    <Label fx:id="logFilenameLabel" text="None" style="-fx-font-family: monospace;"/>
+                </HBox>
+                <HBox spacing="8">
+                    <Label text="Rows:" style="-fx-text-fill: #64748b;"/>
+                    <Label fx:id="logRowCountLabel" text="0" style="-fx-font-family: monospace;"/>
+                </HBox>
+            </VBox>
+        </VBox>
+    </HBox>
+</VBox>

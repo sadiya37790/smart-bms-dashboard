@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.bms.dashboard.controller.SettingsController"
+      spacing="16" prefWidth="420" styleClass="card-panel">
+    <padding>
+        <Insets top="20" right="20" bottom="20" left="20"/>
+    </padding>
+
+    <Label text="Protection Threshold Settings" styleClass="section-header" style="-fx-font-size: 16px;"/>
+
+    <GridPane vgap="12" hgap="16">
+        <columnConstraints">
+            <ColumnConstraints percentWidth="55"/>
+            <ColumnConstraints percentWidth="45"/>
+        </columnConstraints>
+
+        <!-- Overcharge -->
+        <Label text="Overcharge Limit (V/cell):" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="overchargeField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <!-- Over-discharge -->
+        <Label text="Over-discharge Limit (V/cell):" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="overdischargeField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <!-- Overcurrent -->
+        <Label text="Overcurrent Limit (A):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="overcurrentField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <!-- Over-temperature -->
+        <Label text="Over-temperature Limit (°C):" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="overtempField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <Separator/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Restore Defaults" onAction="#handleRestoreDefaults"/>
+        <Button text="Cancel" onAction="#handleCancel"/>
+        <Button text="Apply Changes" onAction="#handleApply" styleClass="button-primary"/>
+    </HBox>
+</VBox>

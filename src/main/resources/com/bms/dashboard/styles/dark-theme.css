@@ -1,0 +1,363 @@
+/* Dark Technical Instrument CSS Theme for Smart BMS Dashboard */
+
+.root {
+    -fx-base: #0f172a;
+    -fx-background: #0f172a;
+    -fx-control-inner-background: #1e293b;
+    -fx-text-fill: #f8fafc;
+    -fx-font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* Scrollbars and Backgrounds */
+.scroll-pane, .viewport {
+    -fx-background-color: #0f172a;
+}
+
+/* Header & Top Bar */
+.top-bar {
+    -fx-background-color: #1e293b;
+    -fx-padding: 12px 18px;
+    -fx-border-color: #334155;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.app-title {
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-fill: #38bdf8;
+    -fx-font-family: 'Consolas', 'Courier New', monospace;
+}
+
+/* Mode Banner Styling */
+.mode-banner {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-padding: 6px 16px;
+    -fx-background-radius: 4px;
+    -fx-font-family: 'Consolas', monospace;
+}
+
+.mode-charging {
+    -fx-background-color: #065f46;
+    -fx-text-fill: #34d399;
+    -fx-border-color: #10b981;
+    -fx-border-radius: 4px;
+}
+
+.mode-discharging {
+    -fx-background-color: #1e3a8a;
+    -fx-text-fill: #60a5fa;
+    -fx-border-color: #3b82f6;
+    -fx-border-radius: 4px;
+}
+
+.mode-idle {
+    -fx-background-color: #334155;
+    -fx-text-fill: #cbd5e1;
+    -fx-border-color: #64748b;
+    -fx-border-radius: 4px;
+}
+
+.mode-fault {
+    -fx-background-color: #7f1d1d;
+    -fx-text-fill: #fca5a5;
+    -fx-border-color: #ef4444;
+    -fx-border-radius: 4px;
+}
+
+/* Connection Status Pill */
+.connection-pill {
+    -fx-padding: 6px 14px;
+    -fx-background-radius: 16px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    -fx-font-family: 'Consolas', monospace;
+}
+
+.pill-connected {
+    -fx-background-color: #064e3b;
+    -fx-text-fill: #6ee7b7;
+    -fx-border-color: #10b981;
+    -fx-border-radius: 16px;
+}
+
+.pill-stale {
+    -fx-background-color: #78350f;
+    -fx-text-fill: #fcd34d;
+    -fx-border-color: #f59e0b;
+    -fx-border-radius: 16px;
+}
+
+.pill-disconnected {
+    -fx-background-color: #450a0a;
+    -fx-text-fill: #fca5a5;
+    -fx-border-color: #ef4444;
+    -fx-border-radius: 16px;
+}
+
+/* Cards & Metric Panels */
+.card-panel {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-border-radius: 6px;
+    -fx-background-radius: 6px;
+    -fx-padding: 14px;
+}
+
+.section-header {
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #94a3b8;
+    -fx-border-color: #334155;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 0 0 6px 0;
+}
+
+/* Large Metric Readouts */
+.metric-tile {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #334155;
+    -fx-border-radius: 4px;
+    -fx-background-radius: 4px;
+    -fx-padding: 10px;
+}
+
+.metric-title {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #64748b;
+}
+
+.metric-value {
+    -fx-font-size: 26px;
+    -fx-font-weight: bold;
+    -fx-font-family: 'Consolas', monospace;
+    -fx-text-fill: #f8fafc;
+}
+
+.metric-unit {
+    -fx-font-size: 12px;
+    -fx-text-fill: #94a3b8;
+    -fx-font-family: 'Consolas', monospace;
+}
+
+/* Stale Data Visual Effect */
+.stale-readings {
+    -fx-opacity: 0.45;
+}
+
+/* SoC Battery Gauge */
+.soc-progress-bar .track {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #334155;
+    -fx-border-radius: 4px;
+}
+
+.soc-high .bar {
+    -fx-background-color: #10b981;
+}
+
+.soc-med .bar {
+    -fx-background-color: #f59e0b;
+}
+
+.soc-low .bar {
+    -fx-background-color: #ef4444;
+}
+
+/* Protection Lamps */
+.protection-lamp {
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+    -fx-padding: 4px 10px;
+    -fx-background-radius: 3px;
+    -fx-font-family: 'Consolas', monospace;
+}
+
+.lamp-normal {
+    -fx-background-color: #064e3b;
+    -fx-text-fill: #34d399;
+}
+
+.lamp-tripped {
+    -fx-background-color: #7f1d1d;
+    -fx-text-fill: #fca5a5;
+    -fx-border-color: #ef4444;
+    -fx-border-radius: 3px;
+}
+
+/* FET Status */
+.fet-label {
+    -fx-font-size: 13px;
+    -fx-font-weight: bold;
+    -fx-padding: 8px 14px;
+    -fx-background-radius: 4px;
+    -fx-font-family: 'Consolas', monospace;
+}
+
+.fet-on {
+    -fx-background-color: #064e3b;
+    -fx-text-fill: #6ee7b7;
+    -fx-border-color: #10b981;
+}
+
+.fet-off {
+    -fx-background-color: #7f1d1d;
+    -fx-text-fill: #fca5a5;
+    -fx-border-color: #ef4444;
+}
+
+/* Delta Cell Readouts */
+.delta-normal {
+    -fx-text-fill: #10b981;
+}
+.delta-warn {
+    -fx-text-fill: #f59e0b;
+}
+.delta-alarm {
+    -fx-text-fill: #ef4444;
+}
+
+/* Table View Dark Styling */
+.table-view {
+    -fx-background-color: #0f172a;
+    -fx-border-color: #334155;
+    -fx-border-radius: 4px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #1e293b;
+}
+
+.table-view .column-header, .table-view .filler {
+    -fx-background-color: #1e293b;
+    -fx-border-color: #334155;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #94a3b8;
+    -fx-font-weight: bold;
+}
+
+.table-row-cell {
+    -fx-background-color: #0f172a;
+    -fx-text-fill: #f8fafc;
+    -fx-border-color: #1e293b;
+    -fx-border-width: 0 0 1px 0;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #111827;
+}
+
+.row-critical {
+    -fx-background-color: #450a0a !important;
+    -fx-text-fill: #fca5a5 !important;
+}
+
+.row-warning {
+    -fx-background-color: #451a03 !important;
+    -fx-text-fill: #fcd34d !important;
+}
+
+.row-info {
+    -fx-background-color: #062c1b !important;
+    -fx-text-fill: #6ee7b7 !important;
+}
+
+/* Charts Dark Theme */
+.chart {
+    -fx-padding: 8px;
+}
+
+.chart-plot-background {
+    -fx-background-color: #0f172a;
+}
+
+.chart-vertical-grid-lines, .chart-horizontal-grid-lines {
+    -fx-stroke: #1e293b;
+    -fx-stroke-dash-array: 2 4;
+}
+
+.axis {
+    -fx-tick-label-fill: #94a3b8;
+    -fx-font-family: 'Consolas', monospace;
+    -fx-font-size: 11px;
+}
+
+.axis-label {
+    -fx-text-fill: #94a3b8;
+}
+
+.default-color0.chart-series-line { -fx-stroke: #38bdf8; -fx-stroke-width: 2px; }
+.default-color1.chart-series-line { -fx-stroke: #f59e0b; -fx-stroke-width: 2px; }
+.default-color2.chart-series-line { -fx-stroke: #ef4444; -fx-stroke-width: 2px; }
+
+.bar-normal {
+    -fx-bar-fill: #38bdf8;
+}
+
+.bar-fault {
+    -fx-bar-fill: #ef4444;
+}
+
+/* Buttons and Controls */
+.button {
+    -fx-background-color: #334155;
+    -fx-text-fill: #f8fafc;
+    -fx-font-weight: bold;
+    -fx-background-radius: 4px;
+    -fx-padding: 6px 14px;
+}
+
+.button:hover {
+    -fx-background-color: #475569;
+    -fx-cursor: hand;
+}
+
+.button:pressed {
+    -fx-background-color: #1e293b;
+}
+
+.button-danger {
+    -fx-background-color: #dc2626;
+    -fx-text-fill: #ffffff;
+}
+
+.button-danger:hover {
+    -fx-background-color: #b91c1c;
+}
+
+.button-primary {
+    -fx-background-color: #0284c7;
+    -fx-text-fill: #ffffff;
+}
+
+.button-primary:hover {
+    -fx-background-color: #0369a1;
+}
+
+.combo-box, .text-field {
+    -fx-background-color: #0f172a;
+    -fx-text-fill: #f8fafc;
+    -fx-border-color: #334155;
+    -fx-border-radius: 4px;
+    -fx-padding: 4px 8px;
+}
+
+.combo-box .list-cell {
+    -fx-text-fill: #f8fafc;
+    -fx-background-color: #1e293b;
+}
+
+.toggle-button {
+    -fx-background-color: #334155;
+    -fx-text-fill: #cbd5e1;
+}
+
+.toggle-button:selected {
+    -fx-background-color: #0284c7;
+    -fx-text-fill: #ffffff;
+}
