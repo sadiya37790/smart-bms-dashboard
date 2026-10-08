@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart BMS Web Dashboard - 4S Lithium-ion Monitor</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Chart.js for high-performance responsive charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- TOP HEADER BAR -->
+    <header class="top-bar">
+        <div class="brand">
+            <h1>⚡ BMS-MONITOR 4S</h1>
+            <div id="modeBanner" class="mode-banner mode-idle">⏸ IDLE</div>
+            <div id="syncBadge" class="sync-badge" style="display: none;">
+                🔄 <span id="syncBadgeText">Auto-Synced Hardware Ratings</span>
+            </div>
+        </div>
+
+        <div class="top-controls">
+            <!-- Serial Controls -->
+            <select id="baudRateSelect" class="select-field">
+                <option value="115200" selected>115200 Baud</option>
+                <option value="9600">9600 Baud</option>
+                <option value="57600">57600 Baud</option>
+                <option value="230400">230400 Baud</option>
+            </select>
+            <button id="connectSerialBtn" class="btn btn-primary">Connect USB</button>
+
+            <!-- Simulator & Settings -->
+            <button id="simulatorToggleBtn" class="btn">🎮 Simulator</button>
+            <button id="settingsBtn" class="btn">⚙ Settings</button>
+
+            <!-- Connection Status Pill -->
+            <div id="connectionPill" class="connection-pill pill-disconnected">
+                <span id="pillStatusText">DISCONNECTED | 0s ago | 0.0 Hz</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN DASHBOARD GRID -->
+    <main class="dashboard-grid">
+        <!-- LEFT COLUMN: LIVE TELEMETRY & CELL BAR CHART -->
+        <section class="card-panel">
+            <h2 class="section-header">LIVE TELEMETRY &amp; PACK METRICS</h2>
+
+            <div id="liveContainer" class="metrics-grid">
+                <!-- Pack Voltage -->
+                <div class="metric-tile">
+                    <span class="metric-title">PACK VOLTAGE</span>
+                    <div class="metric-value-container">
+                        <span id="packVVal" class="metric-value" style="color: #38bdf8;">14.80</span>
+                        <span class="metric-unit">V</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="packVBar" class="progress-fill" style="width: 64%; background: #38bdf8;"></div>
+                    </div>
+                </div>
+
+                <!-- Pack Current -->
+                <div class="metric-tile">
+                    <span class="metric-title">PACK CURRENT</span>
+                    <div class="metric-value-container">
+                        <span id="currentVal" class="metric-value" style="color: #f59e0b;">+0.00</span>
+                        <span class="metric-unit">A</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="currentBar" class="progress-fill" style="width: 50%; background: #f59e0b;"></div>
+                    </div>
+                </div>
+
+                <!-- Temperature -->
+                <div class="metric-tile">
+                    <span class="metric-title">TEMPERATURE</span>
+                    <div class="metric-value-container">
+                        <span id="tempVal" class="metric-value" style="color: #10b981;">25.0</span>
+                        <span class="metric-unit">°C</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="tempBar" class="progress-fill" style="width: 42%; background: #10b981;"></div>
+                    </div>
+                </div>
+
+                <!-- Power Output -->
+                <div class="metric-tile">
+                    <span class="metric-title">POWER OUTPUT</span>
+                    <div class="metric-value-container">
+                        <span id="powerVal" class="metric-value" style="color: #a855f7;">0.0</span>
+                        <span class="metric-unit">W</span>
+                    </div>
+                    <div class="progress-track">
+                        <div id="powerBar" class="progress-fill" style="width: 0%; background: #a855f7;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SoC Battery Gauge -->
+            <div class="soc-gauge-card">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span class="metric-title">STATE OF CHARGE (SoC)</span>
+                    <span id="socVal" class="metric-value" style="font-size: 16px; color: #34d399;">65.0 %</span>
+                </div>
+                <div class="soc-bar-container">
+                    <div id="socBar" class="soc-bar-fill soc-high" style="width: 65%;"></div>
+                </div>
+            </div>
+
+            <!-- Cell Voltage Bar Chart -->
+            <div class="metric-tile" style="flex: 1; display: flex; flex-direction: column;">
+                <span class="metric-title" style="margin-bottom: 6px;">CELL VOLTAGES (4S PACK)</span>
+                <div style="flex: 1; min-height: 160px; position: relative;">
+                    <canvas id="cellBarChartCanvas"></canvas>
+                </div>
+                <!-- Min / Max / Delta Readouts -->
+                <div style="display: flex; justify-content: space-around; margin-top: 8px; font-family: var(--font-mono);">
+                    <span>MAX: <strong id="maxCellVal">3.700 V</strong></span>
+                    <span>MIN: <strong id="minCellVal">3.700 V</strong></span>
+                    <span>DELTA: <strong id="cellDeltaVal" style="color: #10b981;">0.0 mV</strong></span>
+                </div>
+            </div>
+        </section>
+
+        <!-- RIGHT COLUMN: PROTECTION LOGIC & SAFETY ALERTS -->
+        <section class="card-panel">
+            <h2 class="section-header">PROTECTION LOGIC &amp; SAFETY ALERTS</h2>
+
+            <div class="metric-tile" style="display: flex; flex-direction: column; gap: 10px;">
+                <div class="protection-grid">
+                    <span>Overcharge (Cell):</span>
+                    <span id="lampOvercharge" class="lamp lamp-normal">NORMAL</span>
+                    <span id="valOvercharge" style="font-family: var(--font-mono);">3.70 V</span>
+                    <span id="threshOvercharge" style="color: var(--text-dim); font-family: var(--font-mono);">&gt; 4.20 V</span>
+
+                    <span>Over-discharge (Cell):</span>
+                    <span id="lampOverdischarge" class="lamp lamp-normal">NORMAL</span>
+                    <span id="valOverdischarge" style="font-family: var(--font-mono);">3.70 V</span>
+                    <span id="threshOverdischarge" style="color: var(--text-dim); font-family: var(--font-mono);">&lt; 2.80 V</span>
+
+                    <span>Overcurrent (|I|):</span>
+                    <span id="lampOvercurrent" class="lamp lamp-normal">NORMAL</span>
+                    <span id="valOvercurrent" style="font-family: var(--font-mono);">0.00 A</span>
+                    <span id="threshOvercurrent" style="color: var(--text-dim); font-family: var(--font-mono);">&gt; 5.00 A</span>
+
+                    <span>Over-temperature:</span>
+                    <span id="lampOvertemp" class="lamp lamp-normal">NORMAL</span>
+                    <span id="valOvertemp" style="font-family: var(--font-mono);">25.0 °C</span>
+                    <span id="threshOvertemp" style="color: var(--text-dim); font-family: var(--font-mono);">&gt; 55.0 °C</span>
+                </div>
+
+                <div class="fet-status-row">
+                    <div id="chargeFetBadge" class="fet-badge fet-on">CHARGE FET: ON</div>
+                    <div id="dischargeFetBadge" class="fet-badge fet-on">DISCHARGE FET: ON</div>
+                    <button id="resetFaultsBtn" class="btn btn-danger">Reset Faults</button>
+                </div>
+            </div>
+
+            <!-- Alert Log Table -->
+            <div style="flex: 1; display: flex; flex-direction: column; gap: 6px;">
+                <span class="metric-title">SYSTEM ALERT LOG (LAST 200 TRIPS)</span>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Parameter</th>
+                                <th>Live Value</th>
+                                <th>Threshold</th>
+                                <th>Severity</th>
+                            </tr>
+                        </thead>
+                        <tbody id="alertTableBody">
+                            <!-- Alert rows injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- BOTTOM PANEL: TREND CHARTS & SIMULATOR FAULT INJECTION -->
+    <footer class="bottom-panel">
+        <!-- Chart 1: Pack Voltage & Current (120s Rolling) -->
+        <div class="chart-box">
+            <span class="metric-title" style="margin-bottom: 4px;">VOLTAGE &amp; CURRENT TRENDS (120s ROLLING WINDOW)</span>
+            <div class="chart-container">
+                <canvas id="vcChartCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Chart 2: Temperature (120s Rolling) -->
+        <div class="chart-box">
+            <span class="metric-title" style="margin-bottom: 4px;">TEMPERATURE TREND (°C)</span>
+            <div class="chart-container">
+                <canvas id="tempChartCanvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Sidebar Controls: Fault Injection & CSV Logging -->
+        <div class="sidebar-panel">
+            <div class="fault-box">
+                <span class="metric-title" style="color: #f59e0b;">FAULT INJECTION (SIMULATOR)</span>
+                <label><input type="checkbox" id="chkOvercharge"> Force Overcharge (&gt;4.20V)</label>
+                <label><input type="checkbox" id="chkOverdischarge"> Force Over-discharge (&lt;2.80V)</label>
+                <label><input type="checkbox" id="chkOvercurrent"> Force Overcurrent (&gt;5.0A)</label>
+                <label><input type="checkbox" id="chkOvertemp"> Force Over-temp (&gt;55.0°C)</label>
+            </div>
+
+            <div class="fault-box" style="flex: 1; justify-content: space-between;">
+                <span class="metric-title">DATA LOGGING &amp; EXPORT</span>
+                <div style="display: flex; gap: 8px;">
+                    <button id="loggingToggleBtn" class="btn" style="flex: 1;">Start Logging</button>
+                    <button id="exportCsvBtn" class="btn btn-primary">Export CSV</button>
+                </div>
+                <div style="font-size: 11px; color: var(--text-muted); font-family: var(--font-mono);">
+                    <div>File: <span id="logFileLabel" style="color: var(--text-main);">None</span></div>
+                    <div>Rows: <span id="logRowsLabel" style="color: var(--text-main);">0</span></div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SETTINGS MODAL DIALOG -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content">
+            <h2 class="section-header" style="font-size: 16px; color: var(--text-main);">Protection Threshold Settings</h2>
+            
+            <div class="modal-grid">
+                <label>Overcharge Limit (V/cell):</label>
+                <input type="number" step="0.01" id="inputOvercharge" class="input-field">
+
+                <label>Over-discharge Limit (V/cell):</label>
+                <input type="number" step="0.01" id="inputOverdischarge" class="input-field">
+
+                <label>Overcurrent Limit (A):</label>
+                <input type="number" step="0.1" id="inputOvercurrent" class="input-field">
+
+                <label>Over-temperature Limit (°C):</label>
+                <input type="number" step="0.5" id="inputOvertemp" class="input-field">
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                <button id="btnRestoreDefaults" class="btn">Restore Defaults</button>
+                <button id="btnCancelSettings" class="btn">Cancel</button>
+                <button id="btnApplySettings" class="btn btn-primary">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Script Module -->
+    <script type="module" src="js/app.js"></script>
+</body>
+</html>
