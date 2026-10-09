@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart BMS Web Dashboard - 4S Lithium-ion Monitor</title>
+    <title>Smart BMS Web Dashboard - 3S Lithium-ion Monitor</title>
     <link rel="stylesheet" href="css/styles.css">
     <!-- Chart.js for high-performance responsive charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -13,7 +13,7 @@
     <!-- TOP HEADER BAR -->
     <header class="top-bar">
         <div class="brand">
-            <h1>⚡ BMS-MONITOR 4S</h1>
+            <h1>⚡ BMS-MONITOR 3S</h1>
             <div id="modeBanner" class="mode-banner mode-idle">⏸ IDLE</div>
             <div id="syncBadge" class="sync-badge" style="display: none;">
                 🔄 <span id="syncBadgeText">Auto-Synced Hardware Ratings</span>
@@ -45,14 +45,14 @@
     <main class="dashboard-grid">
         <!-- LEFT COLUMN: LIVE TELEMETRY & CELL BAR CHART -->
         <section class="card-panel">
-            <h2 class="section-header">LIVE TELEMETRY &amp; PACK METRICS</h2>
+            <h2 class="section-header">LIVE TELEMETRY &amp; PACK METRICS (3S)</h2>
 
             <div id="liveContainer" class="metrics-grid">
                 <!-- Pack Voltage -->
                 <div class="metric-tile">
                     <span class="metric-title">PACK VOLTAGE</span>
                     <div class="metric-value-container">
-                        <span id="packVVal" class="metric-value" style="color: #38bdf8;">14.80</span>
+                        <span id="packVVal" class="metric-value" style="color: #38bdf8;">11.10</span>
                         <span class="metric-unit">V</span>
                     </div>
                     <div class="progress-track">
@@ -110,7 +110,7 @@
 
             <!-- Cell Voltage Bar Chart -->
             <div class="metric-tile" style="flex: 1; display: flex; flex-direction: column;">
-                <span class="metric-title" style="margin-bottom: 6px;">CELL VOLTAGES (4S PACK)</span>
+                <span class="metric-title" style="margin-bottom: 6px;">CELL VOLTAGES (3S PACK)</span>
                 <div style="flex: 1; min-height: 160px; position: relative;">
                     <canvas id="cellBarChartCanvas"></canvas>
                 </div>

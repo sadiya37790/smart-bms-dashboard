@@ -1,11 +1,11 @@
 /**
- * Smart BMS Model & Protection Logic Engine
+ * Smart BMS Model & Protection Logic Engine (3S Li-ion Battery Pack)
  * Includes Dynamic Hardware Battery Rating & Cutoff Auto-Sync
  */
 
 export class BmsSample {
-    constructor(cellVoltages = [3.70, 3.70, 3.70, 3.70], current = 0.0, temperature = 25.0, timestamp = null, hardwareConfig = null) {
-        this.v = cellVoltages && cellVoltages.length > 0 ? cellVoltages : [3.70, 3.70, 3.70, 3.70];
+    constructor(cellVoltages = [3.70, 3.70, 3.70], current = 0.0, temperature = 25.0, timestamp = null, hardwareConfig = null) {
+        this.v = cellVoltages && cellVoltages.length > 0 ? cellVoltages : [3.70, 3.70, 3.70];
         this.i = current;
         this.t = temperature;
         this.ts = timestamp || Math.floor(Date.now() / 1000);
@@ -28,7 +28,7 @@ export class BmsSample {
 
 export class DerivedBmsData {
     constructor(sample, hasActiveFault, settings) {
-        const voltages = sample.v || [3.70, 3.70, 3.70, 3.70];
+        const voltages = sample.v || [3.70, 3.70, 3.70];
         let sum = 0;
         let maxV = Number.MIN_VALUE;
         let minV = Number.MAX_VALUE;

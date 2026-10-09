@@ -1,5 +1,5 @@
 /**
- * Smart BMS Telemetry Simulator Engine with Fault Injections
+ * Smart BMS Telemetry Simulator Engine with Fault Injections (3S Li-ion Battery Pack)
  */
 
 import { BmsSample } from './model.js';
@@ -78,19 +78,19 @@ export class BmsSimulator {
             nominalCellV = 3.7 + ((this.baseSoc - 50.0) / 50.0) * 0.5;
         }
 
+        // 3S Pack (3 cells)
         const cellVoltages = [
             nominalCellV + 0.012 + (Math.random() * 0.006 - 0.003),
             nominalCellV - 0.008 + (Math.random() * 0.006 - 0.003),
-            nominalCellV + 0.004 + (Math.random() * 0.006 - 0.003),
-            nominalCellV - 0.005 + (Math.random() * 0.006 - 0.003)
+            nominalCellV + 0.004 + (Math.random() * 0.006 - 0.003)
         ];
 
         // Apply Fault Injections if active
         if (this.forceOvercharge) {
-            cellVoltages[3] = 4.28 + (Math.random() * 0.02); // > 4.20V limit
+            cellVoltages[2] = 4.28 + (Math.random() * 0.02); // > 4.20V limit on Cell 3
         }
         if (this.forceOverdischarge) {
-            cellVoltages[0] = 2.72 - (Math.random() * 0.02); // < 2.80V limit
+            cellVoltages[0] = 2.72 - (Math.random() * 0.02); // < 2.80V limit on Cell 1
         }
         if (this.forceOvercurrent) {
             this.currentAmps = -6.20 - (Math.random() * 0.3); // |I| > 5.0A limit

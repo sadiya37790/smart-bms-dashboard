@@ -1,5 +1,5 @@
 /**
- * Main Web BMS Dashboard Controller & UI Orchestrator
+ * Main Web BMS Dashboard Controller & UI Orchestrator (3S Li-ion Battery Pack)
  */
 
 import { BmsSample, DerivedBmsData, ProtectionSettings } from './model.js';
@@ -137,16 +137,16 @@ class App {
     }
 
     initCharts() {
-        // 1. Cell Voltage Bar Chart
+        // 1. Cell Voltage Bar Chart (3S: Cell 1, Cell 2, Cell 3)
         const cellCtx = document.getElementById('cellBarChartCanvas').getContext('2d');
         this.cellBarChart = new Chart(cellCtx, {
             type: 'bar',
             data: {
-                labels: ['Cell 1', 'Cell 2', 'Cell 3', 'Cell 4'],
+                labels: ['Cell 1', 'Cell 2', 'Cell 3'],
                 datasets: [{
                     label: 'Voltage (V)',
-                    data: [3.70, 3.70, 3.70, 3.70],
-                    backgroundColor: ['#38bdf8', '#38bdf8', '#38bdf8', '#38bdf8'],
+                    data: [3.70, 3.70, 3.70],
+                    backgroundColor: ['#38bdf8', '#38bdf8', '#38bdf8'],
                     borderRadius: 4
                 }]
             },
@@ -327,9 +327,9 @@ class App {
         this.tempVal.innerText = sample.t.toFixed(1);
         this.powerVal.innerText = derived.power.toFixed(1);
 
-        // Dynamic progress bar scaled to current thresholds
-        const minPackV = (this.protectionSettings.overdischargeThreshold * 4);
-        const maxPackV = (this.protectionSettings.overchargeThreshold * 4);
+        // Dynamic progress bar scaled to 3S thresholds
+        const minPackV = (this.protectionSettings.overdischargeThreshold * 3);
+        const maxPackV = (this.protectionSettings.overchargeThreshold * 3);
         this.packVBar.style.width = `${Math.max(0, Math.min(100, ((derived.packVoltage - minPackV) / (maxPackV - minPackV)) * 100))}%`;
 
         const maxI = this.protectionSettings.overcurrentThreshold * 2;
@@ -353,10 +353,10 @@ class App {
     }
 
     updateCellBarChart(voltages, derived) {
-        if (!voltages || voltages.length < 4) return;
+        if (!voltages || voltages.length < 3) return;
 
         const bgColors = voltages.map(v => (v > this.protectionSettings.overchargeThreshold || v < this.protectionSettings.overdischargeThreshold) ? '#ef4444' : '#38bdf8');
-        this.cellBarChart.data.datasets[0].data = voltages;
+        this.cellBarChart.data.datasets[0].data = voltages.slice(0, 3);
         this.cellBarChart.data.datasets[0].backgroundColor = bgColors;
         this.cellBarChart.update();
 
