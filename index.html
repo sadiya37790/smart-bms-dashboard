@@ -29,9 +29,6 @@
                 <option value="230400">230400 Baud</option>
             </select>
             <button id="connectSerialBtn" class="btn btn-primary">Connect USB</button>
-
-            <!-- Simulator & Settings -->
-            <button id="simulatorToggleBtn" class="btn">🎮 Simulator</button>
             <button id="settingsBtn" class="btn">⚙ Settings</button>
 
             <!-- Connection Status Pill -->
@@ -198,17 +195,8 @@
             </div>
         </div>
 
-        <!-- Sidebar Controls: Fault Injection & CSV Logging -->
+        <!-- Sidebar Controls: CSV Logging only -->
         <div class="sidebar-panel">
-            <div id="faultInjectionPanel" class="fault-box fault-panel-disabled">
-                <span class="metric-title" style="color: #f59e0b;">FAULT INJECTION <span style="color: #64748b; font-size:10px;">(SIMULATOR ONLY)</span></span>
-                <p id="faultPanelHint" style="font-size:11px; color:#64748b; margin:2px 0 4px;">Enable Simulator to use fault injections.</p>
-                <label><input type="checkbox" id="chkOvercharge" disabled> Force Overcharge (&gt;4.20V)</label>
-                <label><input type="checkbox" id="chkOverdischarge" disabled> Force Over-discharge (&lt;2.80V)</label>
-                <label><input type="checkbox" id="chkOvercurrent" disabled> Force Overcurrent (&gt;5.0A)</label>
-                <label><input type="checkbox" id="chkOvertemp" disabled> Force Over-temp (&gt;55.0°C)</label>
-            </div>
-
             <div class="fault-box" style="flex: 1; justify-content: space-between;">
                 <span class="metric-title">DATA LOGGING &amp; EXPORT</span>
                 <div style="display: flex; gap: 8px;">

@@ -1,16 +1,15 @@
 /**
  * Main Web BMS Dashboard Controller & UI Orchestrator (3S Li-ion Battery Pack)
+ * Hardware-only mode: values displayed only when prototype is connected via USB serial.
  */
 
 import { BmsSample, DerivedBmsData, ProtectionSettings } from './model.js';
-import { BmsSimulator } from './simulator.js';
 import { WebSerialService } from './serial.js';
 import { CsvLogger } from './logger.js';
 
 class App {
     constructor() {
         this.protectionSettings = new ProtectionSettings((cfg) => this.onHardwareConfigSynced(cfg));
-        this.simulator = new BmsSimulator((sample) => this.onSampleReceived(sample));
         this.serialService = new WebSerialService(
             (sample) => this.onSampleReceived(sample),
             (statusMsg) => this.updateSerialStatus(statusMsg)
@@ -48,7 +47,6 @@ class App {
 
         this.connectSerialBtn = document.getElementById('connectSerialBtn');
         this.baudRateSelect = document.getElementById('baudRateSelect');
-        this.simulatorToggleBtn = document.getElementById('simulatorToggleBtn');
         this.settingsBtn = document.getElementById('settingsBtn');
 
         // Telemetry Readouts
@@ -96,12 +94,6 @@ class App {
         // Alert Table
         this.alertTableBody = document.getElementById('alertTableBody');
 
-        // Fault Injectors
-        this.chkOvercharge = document.getElementById('chkOvercharge');
-        this.chkOverdischarge = document.getElementById('chkOverdischarge');
-        this.chkOvercurrent = document.getElementById('chkOvercurrent');
-        this.chkOvertemp = document.getElementById('chkOvertemp');
-
         // Logging Toolbar
         this.loggingToggleBtn = document.getElementById('loggingToggleBtn');
         this.exportCsvBtn = document.getElementById('exportCsvBtn');
@@ -119,26 +111,17 @@ class App {
         this.btnCancelSettings = document.getElementById('btnCancelSettings');
 
         // Event Listeners
-        this.simulatorToggleBtn.addEventListener('click', () => this.toggleSimulator());
         this.connectSerialBtn.addEventListener('click', () => this.toggleSerialConnection());
         this.resetFaultsBtn.addEventListener('click', () => this.handleResetFaults());
-
-        this.chkOvercharge.addEventListener('change', () => this.updateFaultInjections());
-        this.chkOverdischarge.addEventListener('change', () => this.updateFaultInjections());
-        this.chkOvercurrent.addEventListener('change', () => this.updateFaultInjections());
-        this.chkOvertemp.addEventListener('change', () => this.updateFaultInjections());
-
         this.loggingToggleBtn.addEventListener('click', () => this.toggleLogging());
-        this.exportCsvBtn.addEventListener('click', () => this.csvLogger.exportCsv(this.lastReceivedSample, this.lastReceivedSample ? new DerivedBmsData(this.lastReceivedSample, this.protectionSettings.hasAnyFault(), this.protectionSettings) : null));
-
+        this.exportCsvBtn.addEventListener('click', () => this.csvLogger.exportCsv(
+            this.lastReceivedSample,
+            this.lastReceivedSample ? new DerivedBmsData(this.lastReceivedSample, this.protectionSettings.hasAnyFault(), this.protectionSettings) : null
+        ));
         this.settingsBtn.addEventListener('click', () => this.openSettingsModal());
         this.btnCancelSettings.addEventListener('click', () => this.closeSettingsModal());
         this.btnApplySettings.addEventListener('click', () => this.applySettings());
         this.btnRestoreDefaults.addEventListener('click', () => this.restoreDefaultSettings());
-
-        // Fault injection checkboxes: uncheck & disable when not in simulator mode
-        [this.chkOvercharge, this.chkOverdischarge, this.chkOvercurrent, this.chkOvertemp]
-            .forEach(chk => { chk.disabled = true; chk.checked = false; });
     }
 
     initCharts() {
@@ -220,28 +203,6 @@ class App {
     }
 
     /**
-     * Enable or disable fault-injection panel based on whether simulator is running.
-     * When real hardware is connected the controls must be hidden so users cannot
-     * accidentally send misleading fault signals.
-     */
-    setFaultInjectionGate(simulatorActive) {
-        const panel = document.getElementById('faultInjectionPanel');
-        const hint  = document.getElementById('faultPanelHint');
-        [this.chkOvercharge, this.chkOverdischarge, this.chkOvercurrent, this.chkOvertemp]
-            .forEach(chk => {
-                chk.disabled = !simulatorActive;
-                if (!simulatorActive) chk.checked = false;
-            });
-        if (panel) {
-            panel.classList.toggle('fault-panel-disabled', !simulatorActive);
-        }
-        if (hint) {
-            hint.style.display = simulatorActive ? 'none' : 'block';
-        }
-        if (!simulatorActive) this.updateFaultInjections(); // clear any active injection
-    }
-
-    /**
      * Render "--" placeholders for every metric tile and dim the live-readings
      * container.  Called on start-up and whenever no data source is active.
      */
@@ -281,44 +242,23 @@ class App {
         this.liveContainer.classList.add('stale-readings');
     }
 
-    toggleSimulator() {
-        if (this.simulator.running) {
-            this.simulator.stop();
-            this.simulatorToggleBtn.classList.remove('btn-primary');
-            this.simulatorToggleBtn.innerText = '🎮 Simulator';
-            this.setFaultInjectionGate(false);
-            this.showDisconnectedState();
-            this.lastPacketTimeMs = 0; // Force pill back to disconnected
-        } else {
-            if (this.serialService.connected) {
-                this.serialService.disconnect();
-            }
-            this.simulator.start();
-            this.simulatorToggleBtn.classList.add('btn-primary');
-            this.simulatorToggleBtn.innerText = '⏹ Stop Simulator';
-            this.setFaultInjectionGate(true);
-        }
-    }
-
+    /**
+     * Toggle USB serial connection to the hardware prototype.
+     * Values only populate when the prototype is physically connected.
+     */
     async toggleSerialConnection() {
         if (this.serialService.connected) {
             await this.serialService.disconnect();
             this.connectSerialBtn.innerText = 'Connect USB';
             this.connectSerialBtn.classList.remove('btn-danger');
-            this.setFaultInjectionGate(false);
             this.showDisconnectedState();
             this.lastPacketTimeMs = 0;
         } else {
-            if (this.simulator.running) {
-                this.toggleSimulator(); // stop simulator first
-            }
-            const baud = this.baudRateSelect.value || 115200;
+            const baud = parseInt(this.baudRateSelect.value) || 115200;
             const ok = await this.serialService.connect(baud);
             if (ok) {
                 this.connectSerialBtn.innerText = 'Disconnect';
                 this.connectSerialBtn.classList.add('btn-danger');
-                // Hardware connected → fault injection must stay DISABLED
-                this.setFaultInjectionGate(false);
             }
         }
     }
@@ -557,13 +497,6 @@ class App {
         this.updateFetBadges();
     }
 
-    updateFaultInjections() {
-        this.simulator.forceOvercharge = this.chkOvercharge.checked;
-        this.simulator.forceOverdischarge = this.chkOverdischarge.checked;
-        this.simulator.forceOvercurrent = this.chkOvercurrent.checked;
-        this.simulator.forceOvertemp = this.chkOvertemp.checked;
-    }
-
     toggleLogging() {
         if (this.csvLogger.logging) {
             this.csvLogger.stopLogging();
@@ -593,7 +526,7 @@ class App {
             }
 
             const elapsedSec = Math.floor((now - this.lastPacketTimeMs) / 1000);
-            const sourceStr = this.serialService.connected ? 'USB SERIAL' : (this.simulator.running ? 'SIMULATOR' : 'N/A');
+            const sourceStr = this.serialService.connected ? 'USB SERIAL' : 'N/A';
 
             if (elapsedSec > 10) {
                 this.setConnectionPill(`DISCONNECTED (${sourceStr})`, 'pill-disconnected', elapsedSec, 0);
