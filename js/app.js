@@ -340,6 +340,9 @@ class App {
         this.packetCount++;
         this.hzPacketCounter++;
 
+        // Un-grey the live-readings panel the instant real data arrives
+        this.liveContainer.classList.remove('stale-readings');
+
         if (this.startChartTimeSec < 0) {
             this.startChartTimeSec = sample.ts;
         }
