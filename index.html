@@ -52,7 +52,7 @@
                 <div class="metric-tile">
                     <span class="metric-title">PACK VOLTAGE</span>
                     <div class="metric-value-container">
-                        <span id="packVVal" class="metric-value" style="color: #38bdf8;">11.10</span>
+                        <span id="packVVal" class="metric-value" style="color: #38bdf8;">--</span>
                         <span class="metric-unit">V</span>
                     </div>
                     <div class="progress-track">
@@ -64,7 +64,7 @@
                 <div class="metric-tile">
                     <span class="metric-title">PACK CURRENT</span>
                     <div class="metric-value-container">
-                        <span id="currentVal" class="metric-value" style="color: #f59e0b;">+0.00</span>
+                        <span id="currentVal" class="metric-value" style="color: #f59e0b;">--</span>
                         <span class="metric-unit">A</span>
                     </div>
                     <div class="progress-track">
@@ -76,7 +76,7 @@
                 <div class="metric-tile">
                     <span class="metric-title">TEMPERATURE</span>
                     <div class="metric-value-container">
-                        <span id="tempVal" class="metric-value" style="color: #10b981;">25.0</span>
+                        <span id="tempVal" class="metric-value" style="color: #10b981;">--</span>
                         <span class="metric-unit">°C</span>
                     </div>
                     <div class="progress-track">
@@ -88,7 +88,7 @@
                 <div class="metric-tile">
                     <span class="metric-title">POWER OUTPUT</span>
                     <div class="metric-value-container">
-                        <span id="powerVal" class="metric-value" style="color: #a855f7;">0.0</span>
+                        <span id="powerVal" class="metric-value" style="color: #a855f7;">--</span>
                         <span class="metric-unit">W</span>
                     </div>
                     <div class="progress-track">
@@ -101,10 +101,10 @@
             <div class="soc-gauge-card">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span class="metric-title">STATE OF CHARGE (SoC)</span>
-                    <span id="socVal" class="metric-value" style="font-size: 16px; color: #34d399;">65.0 %</span>
+                    <span id="socVal" class="metric-value" style="font-size: 16px; color: #34d399;">-- %</span>
                 </div>
                 <div class="soc-bar-container">
-                    <div id="socBar" class="soc-bar-fill soc-high" style="width: 65%;"></div>
+                    <div id="socBar" class="soc-bar-fill" style="width: 0%;"></div>
                 </div>
             </div>
 
@@ -116,9 +116,9 @@
                 </div>
                 <!-- Min / Max / Delta Readouts -->
                 <div style="display: flex; justify-content: space-around; margin-top: 8px; font-family: var(--font-mono);">
-                    <span>MAX: <strong id="maxCellVal">3.700 V</strong></span>
-                    <span>MIN: <strong id="minCellVal">3.700 V</strong></span>
-                    <span>DELTA: <strong id="cellDeltaVal" style="color: #10b981;">0.0 mV</strong></span>
+                    <span>MAX: <strong id="maxCellVal">--</strong></span>
+                    <span>MIN: <strong id="minCellVal">--</strong></span>
+                    <span>DELTA: <strong id="cellDeltaVal" style="color: #64748b;">--</strong></span>
                 </div>
             </div>
         </section>
@@ -131,22 +131,22 @@
                 <div class="protection-grid">
                     <span>Overcharge (Cell):</span>
                     <span id="lampOvercharge" class="lamp lamp-normal">NORMAL</span>
-                    <span id="valOvercharge" style="font-family: var(--font-mono);">3.70 V</span>
+                    <span id="valOvercharge" style="font-family: var(--font-mono);">--</span>
                     <span id="threshOvercharge" style="color: var(--text-dim); font-family: var(--font-mono);">&gt; 4.20 V</span>
 
                     <span>Over-discharge (Cell):</span>
                     <span id="lampOverdischarge" class="lamp lamp-normal">NORMAL</span>
-                    <span id="valOverdischarge" style="font-family: var(--font-mono);">3.70 V</span>
+                    <span id="valOverdischarge" style="font-family: var(--font-mono);">--</span>
                     <span id="threshOverdischarge" style="color: var(--text-dim); font-family: var(--font-mono);">&lt; 2.80 V</span>
 
                     <span>Overcurrent (|I|):</span>
                     <span id="lampOvercurrent" class="lamp lamp-normal">NORMAL</span>
-                    <span id="valOvercurrent" style="font-family: var(--font-mono);">0.00 A</span>
+                    <span id="valOvercurrent" style="font-family: var(--font-mono);">--</span>
                     <span id="threshOvercurrent" style="color: var(--text-dim); font-family: var(--font-mono);">&gt; 5.00 A</span>
 
                     <span>Over-temperature:</span>
                     <span id="lampOvertemp" class="lamp lamp-normal">NORMAL</span>
-                    <span id="valOvertemp" style="font-family: var(--font-mono);">25.0 °C</span>
+                    <span id="valOvertemp" style="font-family: var(--font-mono);">--</span>
                     <span id="threshOvertemp" style="color: var(--text-dim); font-family: var(--font-mono);">&gt; 55.0 °C</span>
                 </div>
 
@@ -200,12 +200,13 @@
 
         <!-- Sidebar Controls: Fault Injection & CSV Logging -->
         <div class="sidebar-panel">
-            <div class="fault-box">
-                <span class="metric-title" style="color: #f59e0b;">FAULT INJECTION (SIMULATOR)</span>
-                <label><input type="checkbox" id="chkOvercharge"> Force Overcharge (&gt;4.20V)</label>
-                <label><input type="checkbox" id="chkOverdischarge"> Force Over-discharge (&lt;2.80V)</label>
-                <label><input type="checkbox" id="chkOvercurrent"> Force Overcurrent (&gt;5.0A)</label>
-                <label><input type="checkbox" id="chkOvertemp"> Force Over-temp (&gt;55.0°C)</label>
+            <div id="faultInjectionPanel" class="fault-box fault-panel-disabled">
+                <span class="metric-title" style="color: #f59e0b;">FAULT INJECTION <span style="color: #64748b; font-size:10px;">(SIMULATOR ONLY)</span></span>
+                <p id="faultPanelHint" style="font-size:11px; color:#64748b; margin:2px 0 4px;">Enable Simulator to use fault injections.</p>
+                <label><input type="checkbox" id="chkOvercharge" disabled> Force Overcharge (&gt;4.20V)</label>
+                <label><input type="checkbox" id="chkOverdischarge" disabled> Force Over-discharge (&lt;2.80V)</label>
+                <label><input type="checkbox" id="chkOvercurrent" disabled> Force Overcurrent (&gt;5.0A)</label>
+                <label><input type="checkbox" id="chkOvertemp" disabled> Force Over-temp (&gt;55.0°C)</label>
             </div>
 
             <div class="fault-box" style="flex: 1; justify-content: space-between;">

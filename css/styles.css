@@ -492,6 +492,22 @@ tr.row-info { background: rgba(6, 44, 27, 0.7); color: #6ee7b7; }
     box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5);
 }
 
+.fault-box input[type="checkbox"]:disabled + span,
+.fault-box input[type="checkbox"]:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.fault-panel-disabled label {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.fault-panel-disabled {
+    border-color: rgba(51, 65, 85, 0.3);
+}
+
 .modal-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;

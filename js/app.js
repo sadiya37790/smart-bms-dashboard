@@ -35,6 +35,7 @@ class App {
         this.initCharts();
         this.startStaleDataTimer();
         this.updateProtectionThresholdLabels();
+        this.showDisconnectedState(); // Start with safe "--" placeholders
     }
 
     initDOM() {
@@ -134,6 +135,10 @@ class App {
         this.btnCancelSettings.addEventListener('click', () => this.closeSettingsModal());
         this.btnApplySettings.addEventListener('click', () => this.applySettings());
         this.btnRestoreDefaults.addEventListener('click', () => this.restoreDefaultSettings());
+
+        // Fault injection checkboxes: uncheck & disable when not in simulator mode
+        [this.chkOvercharge, this.chkOverdischarge, this.chkOvercurrent, this.chkOvertemp]
+            .forEach(chk => { chk.disabled = true; chk.checked = false; });
     }
 
     initCharts() {
@@ -214,11 +219,76 @@ class App {
         });
     }
 
+    /**
+     * Enable or disable fault-injection panel based on whether simulator is running.
+     * When real hardware is connected the controls must be hidden so users cannot
+     * accidentally send misleading fault signals.
+     */
+    setFaultInjectionGate(simulatorActive) {
+        const panel = document.getElementById('faultInjectionPanel');
+        const hint  = document.getElementById('faultPanelHint');
+        [this.chkOvercharge, this.chkOverdischarge, this.chkOvercurrent, this.chkOvertemp]
+            .forEach(chk => {
+                chk.disabled = !simulatorActive;
+                if (!simulatorActive) chk.checked = false;
+            });
+        if (panel) {
+            panel.classList.toggle('fault-panel-disabled', !simulatorActive);
+        }
+        if (hint) {
+            hint.style.display = simulatorActive ? 'none' : 'block';
+        }
+        if (!simulatorActive) this.updateFaultInjections(); // clear any active injection
+    }
+
+    /**
+     * Render "--" placeholders for every metric tile and dim the live-readings
+     * container.  Called on start-up and whenever no data source is active.
+     */
+    showDisconnectedState() {
+        this.packVVal.innerText = '--';
+        this.currentVal.innerText = '--';
+        this.tempVal.innerText = '--';
+        this.powerVal.innerText = '--';
+        this.packVBar.style.width = '0%';
+        this.currentBar.style.width = '0%';
+        this.tempBar.style.width = '0%';
+        this.powerBar.style.width = '0%';
+
+        this.socVal.innerText = '-- %';
+        this.socBar.style.width = '0%';
+        this.socBar.className = 'soc-bar-fill';
+
+        this.maxCellVal.innerText = '--';
+        this.minCellVal.innerText = '--';
+        this.cellDeltaVal.innerText = '--';
+        this.cellDeltaVal.style.color = '';
+
+        this.valOvercharge.innerText = '--';
+        this.valOverdischarge.innerText = '--';
+        this.valOvercurrent.innerText = '--';
+        this.valOvertemp.innerText = '--';
+
+        // Reset cell bar chart to zero
+        if (this.cellBarChart) {
+            this.cellBarChart.data.datasets[0].data = [0, 0, 0];
+            this.cellBarChart.data.datasets[0].backgroundColor = ['#334155', '#334155', '#334155'];
+            this.cellBarChart.update();
+        }
+
+        this.modeBanner.className = 'mode-banner mode-idle';
+        this.modeBanner.innerText = '⏸ IDLE';
+        this.liveContainer.classList.add('stale-readings');
+    }
+
     toggleSimulator() {
         if (this.simulator.running) {
             this.simulator.stop();
             this.simulatorToggleBtn.classList.remove('btn-primary');
             this.simulatorToggleBtn.innerText = '🎮 Simulator';
+            this.setFaultInjectionGate(false);
+            this.showDisconnectedState();
+            this.lastPacketTimeMs = 0; // Force pill back to disconnected
         } else {
             if (this.serialService.connected) {
                 this.serialService.disconnect();
@@ -226,6 +296,7 @@ class App {
             this.simulator.start();
             this.simulatorToggleBtn.classList.add('btn-primary');
             this.simulatorToggleBtn.innerText = '⏹ Stop Simulator';
+            this.setFaultInjectionGate(true);
         }
     }
 
@@ -234,15 +305,20 @@ class App {
             await this.serialService.disconnect();
             this.connectSerialBtn.innerText = 'Connect USB';
             this.connectSerialBtn.classList.remove('btn-danger');
+            this.setFaultInjectionGate(false);
+            this.showDisconnectedState();
+            this.lastPacketTimeMs = 0;
         } else {
             if (this.simulator.running) {
-                this.toggleSimulator();
+                this.toggleSimulator(); // stop simulator first
             }
             const baud = this.baudRateSelect.value || 115200;
             const ok = await this.serialService.connect(baud);
             if (ok) {
                 this.connectSerialBtn.innerText = 'Disconnect';
                 this.connectSerialBtn.classList.add('btn-danger');
+                // Hardware connected → fault injection must stay DISABLED
+                this.setFaultInjectionGate(false);
             }
         }
     }
